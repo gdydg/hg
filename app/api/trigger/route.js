@@ -5,13 +5,10 @@ import {
 } from '../shared';
 
 export const runtime = 'edge';
-// 允许该接口执行最长 60 秒 (如果在 Vercel/NextJS 环境中)
 export const maxDuration = 60; 
 
 export async function GET(request) {
     const redis = getRedisClient();
-    
-    // 解析 URL 参数，支持 ?sid=1 这种形式
     const { searchParams } = new URL(request.url);
     const targetSid = searchParams.get('sid');
     
