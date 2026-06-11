@@ -1,13 +1,16 @@
 {
-  "name": "sports",
+  "name": "sports-live-nextjs",
   "version": "1.0.0",
-  "description": "1",
-  "main": "src/index.js",
+  "private": true,
   "scripts": {
-    "dev": "hono dev src/index.js"
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start"
   },
   "dependencies": {
-    "hono": "^4.0.0",
+    "next": "latest",
+    "react": "latest",
+    "react-dom": "latest",
     "@upstash/redis": "^1.28.0"
   }
 }
