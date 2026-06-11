@@ -15,7 +15,6 @@ export const REDIS_KEY_PREFIX = "sports_live_streams";
 // ==================== 2. 公共功能 ====================
 export function getRedisClient() {
     return new Redis({
-        // 在 Next.js 中，环境变量通过 process.env 获取
         url: process.env.UPSTASH_REDIS_REST_URL,
         token: process.env.UPSTASH_REDIS_REST_TOKEN,
     });
