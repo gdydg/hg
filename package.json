@@ -1,0 +1,13 @@
+{
+  "name": "sports",
+  "version": "1.0.0",
+  "description": "1",
+  "main": "src/index.js",
+  "scripts": {
+    "dev": "hono dev src/index.js"
+  },
+  "dependencies": {
+    "hono": "^4.0.0",
+    "@upstash/redis": "^1.28.0"
+  }
+}
