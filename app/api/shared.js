@@ -75,7 +75,16 @@ export async function fetchStreamsForMatch(sid, iid) {
         
         for (const v of videos) {
             if (v.info && v.info.includes("http")) {
-                streams.push(v.info);
+                let rawUrl = v.info;
+                
+                // 【核心修改点】：URL 清洗逻辑
+                // 1. 截断问号，丢弃所有尾部的 token 和时间戳参数
+                let cleanUrl = rawUrl.split('?')[0]; 
+                
+                // 2. 将自适应画质替换为强制 1080p
+                cleanUrl = cleanUrl.replace('adaptive.m3u8', '1080p.m3u8');
+                
+                streams.push(cleanUrl);
             }
         }
         return streams;
