@@ -1,10 +1,12 @@
 import { Redis } from '@upstash/redis';
 
 // ==================== 1. 核心指纹与Token配置 ====================
-const STATIC_HASH = "373c3c5eddd48672e373817c3ae6d27ea8294fdf78ffaeafff46ba807f55a186";
+// 🚨 警告：目前使用抓包获取的静态 Hash。如果服务端严格校验 x-checksum 与请求内容的对应关系导致 403，
+// 则需要进一步逆向前端找出真实的 SHA256 加密规则。
+const STATIC_HASH = "4bdc1c1091a80d644b6338f627b810cf9c5372be0989d600766a89fffed3271f";
 const DOMAIN = "z2u5hpn84mjfgbej.app";
 const UUID = "f50743a72e22fde30abfc716e1e24a32";
-const AUTH_TOKEN = "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpY2xhaW1zIjp7ImxhbmRsb3JkX2lkIjoicGQzIiwidXNlcl9pZCI6InBkM19hbGluYTI1IiwidXNlcl90YWdfaWQiOjAsInVzZXJfYWNjb3VudCI6InBkM19hbGluYTI1IiwidHlwZSI6MCwidXNlcl9uYW1lIjoiYWxpbmEyNSIsImRldmljZSI6MSwiY3VycmVuY3kiOiJDTlkiLCJzcGVjaWFsX2xpbWl0IjoiMCIsInRhZ19pZCI6MCwidGFnX25hbWUiOiIiLCJ0YWdfc3BlY2lhbF9saW1pdCI6IjAiLCJ0YWdfZXh0cmFfZGVsYXkiOjAsInRhZ19pc19iZXQiOjAsInRhZ19pc190ZXN0IjowLCJ0YWdfaXNfZWFybHkiOjB9LCJsYW5nIjoiZW4iLCJ0aW1lem9uZSI6IlVUQyIsImlzcyI6Imp3dCIsImV4cCI6MTc4MTIzOTY1NywiaWF0IjoxNzgxMTUzMjU3fQ.xwXVqCn33hAiYdT7dsX3hRA_Alnq8DlDm8OeQa8lsa4";
+const AUTH_TOKEN = "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpY2xhaW1zIjp7ImxhbmRsb3JkX2lkIjoicGQzIiwidXNlcl9pZCI6InBkM19hbGluYTI1IiwidXNlcl90YWdfaWQiOjAsInVzZXJfYWNjb3VudCI6InBkM19hbGluYTI1IiwidHlwZSI6MCwidXNlcl9uYW1lIjoiYWxpbmEyNSIsImRldmljZSI6MSwiY3VycmVuY3kiOiJDTlkiLCJzcGVjaWFsX2xpbWl0IjoiMCIsInRhZ19pZCI6MCwidGFnX25hbWUiOiIiLCJ0YWdfc3BlY2lhbF9saW1pdCI6IjAiLCJ0YWdfZXh0cmFfZGVsYXkiOjAsInRhZ19pc19iZXQiOjAsInRhZ19pc190ZXN0IjowLCJ0YWdfaXNfZWFybHkiOjB9LCJsYW5nIjoiZW4iLCJ0aW1lem9uZSI6IlVUQyIsImlzcyI6Imp3dCIsImV4cCI6MTc4MTkyNDcyOSwiaWF0IjoxNzgxODM4MzI5fQ.xu7YI2_DQfcLXF2V0TWbV-i7WxmMnAk2eN-eRrr8xr0";
 
 export const TARGET_SIDS = {
     1: "足球", 2: "篮球", 3: "网球", 4: "棒球", 9: "羽毛球", 39: "乒乓球"
@@ -22,6 +24,13 @@ export function getRedisClient() {
 
 function getHeaders() {
     const ts = Date.now();
+    
+    // 动态生成 cks: 10位秒级时间戳 + 5位随机十六进制
+    const tsSec = Math.floor(ts / 1000);
+    const randomHex = Math.floor(Math.random() * 0xfffff).toString(16).padStart(5, '0');
+    const cks = `${tsSec}${randomHex}`;
+
+    // 生成动态签名 base64
     const rawStr = `${STATIC_HASH}|${DOMAIN}|${UUID}|${ts}|`;
     const dynamicChecksum = btoa(rawStr); 
 
@@ -30,16 +39,32 @@ function getHeaders() {
         'accept-language': 'zh-cn',
         'apptype': '2',
         'authorization': AUTH_TOKEN,
+        'browser': 'Chrome',
+        'cks': cks,
+        'currency': 'CNY',
+        'device': 'mobile',
         'origin': `https://${DOMAIN}`,
+        'os': 'unknown 10',
+        'priority': 'u=1, i',
         'referer': `https://${DOMAIN}/`,
-        'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/148.0.0.0 Safari/537.36',
-        'x-uuid': UUID,
-        'x-checksum': dynamicChecksum
+        'screen': '934x898',
+        'sec-ch-ua': '"Google Chrome";v="149", "Chromium";v="149", "Not)A;Brand";v="24"',
+        'sec-ch-ua-mobile': '?0',
+        'sec-ch-ua-platform': '"Windows"',
+        'sec-fetch-dest': 'empty',
+        'sec-fetch-mode': 'cors',
+        'sec-fetch-site': 'cross-site',
+        'time-zone': 'GMT+08:00',
+        'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36',
+        'x-checksum': dynamicChecksum,
+        'x-uuid': UUID
     };
 }
 
+// ==================== 3. 业务接口 ====================
 export async function fetchMatchesForSid(sid) {
-    const url = `https://pub-nwapi-ddos.ewlcs.com/product/business/sport/tournament/info?sid=${sid}&sort=tournament&inplay=true&language=zh-cn`;
+    // 已移除旧版失效的 sort=tournament 参数
+    const url = `https://pub-nwapi-ddos.zuanqian8.com/product/business/sport/tournament/info?sid=${sid}&inplay=true&language=zh-cn`;
     try {
         const res = await fetch(url, { headers: getHeaders() });
         const data = await res.json();
@@ -61,12 +86,13 @@ export async function fetchMatchesForSid(sid) {
         }
         return matches;
     } catch (e) {
+        console.error(`获取 sid=${sid} 比赛列表失败:`, e.message);
         return [];
     }
 }
 
 export async function fetchStreamsForMatch(sid, iid) {
-    const url = `https://pub-nwapi-ddos.ewlcs.com/product/business/sport/inplay/match?sid=${sid}&iid=${iid}&language=zh-cn`;
+    const url = `https://pub-nwapi-ddos.zuanqian8.com/product/business/sport/inplay/match?sid=${sid}&iid=${iid}&language=zh-cn`;
     try {
         const res = await fetch(url, { headers: getHeaders() });
         const data = await res.json();
@@ -77,7 +103,7 @@ export async function fetchStreamsForMatch(sid, iid) {
             if (v.info && v.info.includes("http")) {
                 let rawUrl = v.info;
                 
-                // 【核心修改点】：URL 清洗逻辑
+                // URL 清洗逻辑
                 // 1. 截断问号，丢弃所有尾部的 token 和时间戳参数
                 let cleanUrl = rawUrl.split('?')[0]; 
                 
@@ -89,6 +115,7 @@ export async function fetchStreamsForMatch(sid, iid) {
         }
         return streams;
     } catch (e) {
+        console.error(`获取 iid=${iid} 直播流失败:`, e.message);
         return [];
     }
 }
