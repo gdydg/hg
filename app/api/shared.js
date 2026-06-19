@@ -2,7 +2,7 @@ import { Redis } from '@upstash/redis';
 
 // ==================== 1. 核心指纹与Token配置 ====================
 const STATIC_HASH = "373c3c5eddd48672e373817c3ae6d27ea8294fdf78ffaeafff46ba807f55a186";
-const DOMAIN = "2x2the4scoihla6w.app";
+const DOMAIN = "z2u5hpn84mjfgbej.app";
 const UUID = "f50743a72e22fde30abfc716e1e24a32";
 const AUTH_TOKEN = "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpY2xhaW1zIjp7ImxhbmRsb3JkX2lkIjoicGQzIiwidXNlcl9pZCI6InBkM19hbGluYTI1IiwidXNlcl90YWdfaWQiOjAsInVzZXJfYWNjb3VudCI6InBkM19hbGluYTI1IiwidHlwZSI6MCwidXNlcl9uYW1lIjoiYWxpbmEyNSIsImRldmljZSI6MSwiY3VycmVuY3kiOiJDTlkiLCJzcGVjaWFsX2xpbWl0IjoiMCIsInRhZ19pZCI6MCwidGFnX25hbWUiOiIiLCJ0YWdfc3BlY2lhbF9saW1pdCI6IjAiLCJ0YWdfZXh0cmFfZGVsYXkiOjAsInRhZ19pc19iZXQiOjAsInRhZ19pc190ZXN0IjowLCJ0YWdfaXNfZWFybHkiOjB9LCJsYW5nIjoiZW4iLCJ0aW1lem9uZSI6IlVUQyIsImlzcyI6Imp3dCIsImV4cCI6MTc4MTIzOTY1NywiaWF0IjoxNzgxMTUzMjU3fQ.xwXVqCn33hAiYdT7dsX3hRA_Alnq8DlDm8OeQa8lsa4";
 
